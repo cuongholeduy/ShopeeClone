@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { rules } from "src/utils/rules";
+import { getRules } from "src/utils/rules";
 
 interface FormData {
   email: string;
@@ -12,6 +12,7 @@ export default function Register() {
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors }
   } = useForm<FormData>();
 
@@ -31,7 +32,7 @@ export default function Register() {
                   type="email"
                   className="w-full rounded-sm border border-gray-300 p-3 outline-none focus:border-gray-500 focus:shadow-sm"
                   placeholder="Email"
-                  {...register("email", rules.email)}
+                  {...register("email", getRules().email)}
                 />
                 <div className="ml-1 mt-1 min-h-[1.25rem] text-sm text-red-600">{errors.email?.message}</div>
               </div>
@@ -40,7 +41,8 @@ export default function Register() {
                   type="password"
                   className="w-full rounded-sm border border-gray-300 p-3 outline-none focus:border-gray-500 focus:shadow-sm"
                   placeholder="Password"
-                  {...register("password", rules.password)}
+                  autoComplete="on"
+                  {...register("password", getRules().password)}
                 />
                 <div className="ml-1 mt-1 min-h-[1.25rem] text-sm text-red-600">{errors.password?.message}</div>
               </div>
@@ -49,7 +51,8 @@ export default function Register() {
                   type="password"
                   className="w-full rounded-sm border border-gray-300 p-3 outline-none focus:border-gray-500 focus:shadow-sm"
                   placeholder="Confirm password"
-                  {...register("confirm_password", rules.confirm_password)}
+                  autoComplete="on"
+                  {...register("confirm_password", getRules(getValues).confirm_password)}
                 />
                 <div className="ml-1 mt-1 min-h-[1.25rem] text-sm text-red-600">{errors.confirm_password?.message}</div>
               </div>
