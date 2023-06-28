@@ -1,8 +1,13 @@
-import { Link } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import Input from "src/components/Input";
-import { registerSchema, RegisterSchema } from "src/utils/rules";
+import { Link } from "react-router-dom"
+import { useForm } from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
+import { useMutation } from "react-query"
+import { omit } from "lodash"
+
+import { registerSchema, RegisterSchema } from "src/utils/rules"
+import { registerAccount } from "src/apis/auth.api"
+
+import Input from "src/components/Input"
 
 export default function Register() {
   const {
@@ -11,11 +16,21 @@ export default function Register() {
     formState: { errors }
   } = useForm<RegisterSchema>({
     resolver: yupResolver(registerSchema)
-  });
+  })
+
+  const registerAccountMutation = useMutation({
+    mutationFn: (body: Omit<RegisterSchema, "confirm_password">) => registerAccount(body)
+  })
 
   const onSubmit = handleSubmit((data) => {
-    console.log(data);
-  });
+    const body = omit(data, ["confirm_password"])
+
+    registerAccountMutation.mutate(body, {
+      onSuccess: (data) => {
+        console.log(data)
+      }
+    })
+  })
 
   return (
     <div className="bg-orange">
@@ -69,5 +84,5 @@ export default function Register() {
         </div>
       </div>
     </div>
-  );
+  )
 }

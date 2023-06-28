@@ -1,4 +1,4 @@
-const path = require("path");
+const path = require("path")
 
 module.exports = {
   extends: [
@@ -44,7 +44,7 @@ module.exports = {
       "warn",
       {
         arrowParens: "always",
-        semi: true,
+        semi: false,
         trailingComma: "none",
         tabWidth: 2,
         endOfLine: "auto",
@@ -55,4 +55,4 @@ module.exports = {
       }
     ]
   }
-};
+}

@@ -1,10 +1,12 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
-import { ReactQueryDevtools } from "react-query/devtools";
-import { QueryClient, QueryClientProvider } from "react-query";
-import "./index.css";
-import App from "./App.tsx";
+import React from "react"
+import ReactDOM from "react-dom/client"
+import { BrowserRouter } from "react-router-dom"
+import { ReactQueryDevtools } from "react-query/devtools"
+import { QueryClient, QueryClientProvider } from "react-query"
+
+import "./index.css"
+
+import App from "./App.tsx"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -12,7 +14,7 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false
     }
   }
-});
+})
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -23,4 +25,4 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
       </QueryClientProvider>
     </BrowserRouter>
   </React.StrictMode>
-);
+)

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router-dom"
 
 export default function RegisterHeader() {
   return (
@@ -16,5 +16,5 @@ export default function RegisterHeader() {
         </nav>
       </div>
     </header>
-  );
+  )
 }
