@@ -11,18 +11,20 @@ import { ResponseApi } from "src/types/utils.type"
 
 import Input from "src/components/Input"
 
+type FormData = RegisterSchema
+
 export default function Register() {
   const {
     register,
     handleSubmit,
     setError,
     formState: { errors }
-  } = useForm<RegisterSchema>({
+  } = useForm<FormData>({
     resolver: yupResolver(registerSchema)
   })
 
   const registerAccountMutation = useMutation({
-    mutationFn: (body: Omit<RegisterSchema, "confirm_password">) => registerAccount(body)
+    mutationFn: (body: Omit<FormData, "confirm_password">) => registerAccount(body)
   })
 
   const onSubmit = handleSubmit((data) => {
@@ -33,13 +35,13 @@ export default function Register() {
         console.log(data)
       },
       onError: (error) => {
-        if (isAxiosUnprocessableEntityError<ResponseApi<Omit<RegisterSchema, "confirm_password">>>(error)) {
+        if (isAxiosUnprocessableEntityError<ResponseApi<Omit<FormData, "confirm_password">>>(error)) {
           const formError = error.response?.data.data
 
           if (formError) {
             Object.keys(formError).forEach((key) => {
-              setError(key as keyof Omit<RegisterSchema, "confirm_password">, {
-                message: formError[key as keyof Omit<RegisterSchema, "confirm_password">],
+              setError(key as keyof Omit<FormData, "confirm_password">, {
+                message: formError[key as keyof Omit<FormData, "confirm_password">],
                 type: "Server"
               })
             })
