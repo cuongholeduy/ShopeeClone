@@ -6,6 +6,8 @@ import { omit } from "lodash"
 
 import { registerSchema, RegisterSchema } from "src/utils/rules"
 import { registerAccount } from "src/apis/auth.api"
+import { isAxiosUnprocessableEntityError } from "src/utils/utils"
+import { ResponseApi } from "src/types/utils.type"
 
 import Input from "src/components/Input"
 
@@ -13,6 +15,7 @@ export default function Register() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors }
   } = useForm<RegisterSchema>({
     resolver: yupResolver(registerSchema)
@@ -28,6 +31,20 @@ export default function Register() {
     registerAccountMutation.mutate(body, {
       onSuccess: (data) => {
         console.log(data)
+      },
+      onError: (error) => {
+        if (isAxiosUnprocessableEntityError<ResponseApi<Omit<RegisterSchema, "confirm_password">>>(error)) {
+          const formError = error.response?.data.data
+
+          if (formError) {
+            Object.keys(formError).forEach((key) => {
+              setError(key as keyof Omit<RegisterSchema, "confirm_password">, {
+                message: formError[key as keyof Omit<RegisterSchema, "confirm_password">],
+                type: "Server"
+              })
+            })
+          }
+        }
       }
     })
   })
