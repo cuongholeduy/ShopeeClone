@@ -76,8 +76,10 @@ const generalSchema = yup.object({
     .oneOf([yup.ref("password")], "Nhập lại password không khớp")
 })
 
+// Form Validation
 export const registerSchema = generalSchema
 export const loginSchema = generalSchema.omit(["confirm_password"])
 
+// Form Data Type
 export type RegisterSchema = yup.InferType<typeof registerSchema>
 export type LoginSchema = yup.InferType<typeof loginSchema>
