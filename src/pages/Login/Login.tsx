@@ -9,6 +9,7 @@ import { login } from "src/apis/auth.api"
 import { isAxiosUnprocessableEntityError } from "src/utils/utils"
 import { ErrorResponse } from "src/types/utils.type"
 import { AppContext } from "src/contexts/app.context"
+import path from "src/constants/path"
 
 import Input from "src/components/Input"
 import Button from "src/components/Button"
@@ -16,7 +17,7 @@ import Button from "src/components/Button"
 type FormData = LoginSchema
 
 export default function Login() {
-  const { setIsAuthenticated } = useContext(AppContext)
+  const { setIsAuthenticated, setProfile } = useContext(AppContext)
   const navigate = useNavigate()
   const {
     register,
@@ -33,9 +34,10 @@ export default function Login() {
 
   const onSubmit = handleSubmit((data) => {
     loginMutation.mutate(data, {
-      onSuccess: () => {
+      onSuccess: (data) => {
         setIsAuthenticated(true)
-        navigate("/")
+        setProfile(data.data.data.user)
+        navigate(path.home)
       },
       onError: (error) => {
         if (isAxiosUnprocessableEntityError<ErrorResponse<FormData>>(error)) {
@@ -90,7 +92,7 @@ export default function Login() {
               </div>
               <div className="mt-8 flex items-center justify-center">
                 <span className="text-gray-400">Bạn chưa có tài khoản?</span>
-                <Link to="/register" className="ml-1 text-red-400 hover:text-red-500">
+                <Link to={path.register} className="ml-1 text-red-400 hover:text-red-500">
                   Đăng ký
                 </Link>
               </div>

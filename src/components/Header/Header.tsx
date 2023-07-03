@@ -5,16 +5,18 @@ import { GlobeAltIcon, ChevronDownIcon, MagnifyingGlassIcon, ShoppingCartIcon } 
 
 import { logout } from "src/apis/auth.api"
 import { AppContext } from "src/contexts/app.context"
+import path from "src/constants/path"
 
 import LogoIcon from "../LogoIcon"
 import Popover from "../Popover"
 
 export default function Header() {
-  const { isAuthenticated, setIsAuthenticated } = useContext(AppContext)
+  const { isAuthenticated, setIsAuthenticated, profile, setProfile } = useContext(AppContext)
   const logoutMutation = useMutation({
     mutationFn: () => logout(),
     onSuccess: () => {
       setIsAuthenticated(false)
+      setProfile(null)
     }
   })
 
@@ -47,13 +49,13 @@ export default function Header() {
               renderPopover={
                 <div className="relative rounded-sm border border-gray-200 bg-white shadow-md">
                   <Link
-                    to="/profile"
+                    to={path.profile}
                     className="block w-full bg-white px-4 py-3 text-left hover:bg-slate-100 hover:text-cyan-500"
                   >
                     Tài khoản của tôi
                   </Link>
                   <Link
-                    to="/"
+                    to={path.home}
                     className="block w-full bg-white px-4 py-3 text-left hover:bg-slate-100 hover:text-cyan-500"
                   >
                     Đơn mua
@@ -74,23 +76,23 @@ export default function Header() {
                   className="h-full w-full rounded-full object-cover"
                 />
               </div>
-              <div>Cuong Ho</div>
+              <div>{profile?.email}</div>
             </Popover>
           )}
           {!isAuthenticated && (
             <div className="ml-3 flex items-center">
-              <Link to="/register" className="mx-3 capitalize hover:text-white/70">
+              <Link to={path.register} className="mx-3 capitalize hover:text-white/70">
                 Đăng ký
               </Link>
               <div className="h-4 border-r-[1px] border-r-white/40" />
-              <Link to="/login" className="mx-3 capitalize hover:text-white/70">
+              <Link to={path.login} className="mx-3 capitalize hover:text-white/70">
                 Đăng nhập
               </Link>
             </div>
           )}
         </div>
         <div className="mt-4 grid grid-cols-12 items-center justify-items-center gap-4">
-          <Link to="/" className="col-span-2">
+          <Link to={path.home} className="col-span-2">
             <LogoIcon className="h-11 fill-white" />
           </Link>
           <form className="col-span-9 w-full">
