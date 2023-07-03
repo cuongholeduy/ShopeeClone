@@ -1,40 +1,98 @@
-import { Link } from "react-router-dom";
+import { useContext } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { useForm } from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
+import { useMutation } from "react-query"
+
+import { loginSchema, LoginSchema } from "src/utils/rules"
+import { login } from "src/apis/auth.api"
+import { isAxiosUnprocessableEntityError } from "src/utils/utils"
+import { ErrorResponse } from "src/types/utils.type"
+import { AppContext } from "src/contexts/app.context"
+import path from "src/constants/path"
+
+import Input from "src/components/Input"
+import Button from "src/components/Button"
+
+type FormData = LoginSchema
 
 export default function Login() {
+  const { setIsAuthenticated, setProfile } = useContext(AppContext)
+  const navigate = useNavigate()
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors }
+  } = useForm<FormData>({
+    resolver: yupResolver(loginSchema)
+  })
+
+  const loginMutation = useMutation({
+    mutationFn: (body: FormData) => login(body)
+  })
+
+  const onSubmit = handleSubmit((data) => {
+    loginMutation.mutate(data, {
+      onSuccess: (data) => {
+        setIsAuthenticated(true)
+        setProfile(data.data.data.user)
+        navigate(path.home)
+      },
+      onError: (error) => {
+        if (isAxiosUnprocessableEntityError<ErrorResponse<FormData>>(error)) {
+          const formError = error.response?.data.data
+
+          if (formError) {
+            Object.keys(formError).forEach((key) => {
+              setError(key as keyof FormData, {
+                message: formError[key as keyof FormData],
+                type: "Server"
+              })
+            })
+          }
+        }
+      }
+    })
+  })
+
   return (
     <div className="bg-orange">
-      <div className="max-auto max-w-7xl px-4">
+      <div className="container">
         <div className="grid grid-cols-1 py-12 lg:grid-cols-5 lg:py-32 lg:pr-10">
           <div className="lg:col-span-2 lg:col-start-4">
-            <form className="rounded bg-white p-10 shadow-sm">
+            <form className="rounded bg-white p-10 shadow-sm" noValidate onSubmit={onSubmit}>
               <div className="text-2xl">Đăng nhập</div>
-              <div className="mt-7">
-                <input
-                  type="email"
-                  name="email"
-                  className="w-full rounded-sm border border-gray-300 p-3 outline-none focus:border-gray-500 focus:shadow-sm"
-                  placeholder="Email"
-                />
-                <div className="ml-1 mt-1 min-h-[1rem] text-sm text-red-600"></div>
-              </div>
+              <Input
+                className="mt-7"
+                type="email"
+                placeholder="Email"
+                name="email"
+                register={register}
+                errorMessage={errors.email?.message}
+              />
+              <Input
+                className="mt-2"
+                type="password"
+                placeholder="Password"
+                name="password"
+                autoComplete="on"
+                register={register}
+                errorMessage={errors.password?.message}
+              />
               <div className="mt-3">
-                <input
-                  type="password"
-                  name="password"
-                  className="w-full rounded-sm border border-gray-300 p-3 outline-none focus:border-gray-500 focus:shadow-sm"
-                  placeholder="Password"
-                  autoComplete="on"
-                />
-                <div className="ml-1 mt-1 min-h-[1rem] text-sm text-red-600"></div>
-              </div>
-              <div className="mt-3">
-                <button className="w-full bg-red-500 px-2 py-4 text-center text-sm uppercase text-white hover:bg-red-600">
+                <Button
+                  className="flex w-full items-center justify-center bg-red-500 px-2 py-4 text-sm uppercase text-white hover:bg-red-600"
+                  type="submit"
+                  isLoading={loginMutation.isLoading}
+                  disabled={loginMutation.isLoading}
+                >
                   Đăng nhập
-                </button>
+                </Button>
               </div>
               <div className="mt-8 flex items-center justify-center">
                 <span className="text-gray-400">Bạn chưa có tài khoản?</span>
-                <Link to="/register" className="ml-1 text-red-400 hover:text-red-500">
+                <Link to={path.register} className="ml-1 text-red-400 hover:text-red-500">
                   Đăng ký
                 </Link>
               </div>
@@ -43,5 +101,5 @@ export default function Login() {
         </div>
       </div>
     </div>
-  );
+  )
 }
