@@ -93,7 +93,7 @@ export default function Header() {
         </div>
         <div className="mt-4 grid grid-cols-12 items-center justify-items-center gap-4">
           <Link to={path.home} className="col-span-2">
-            <LogoIcon className="h-11 fill-white" />
+            <LogoIcon className="h-11 w-full fill-white" />
           </Link>
           <form className="col-span-9 w-full">
             <div className="flex rounded-sm bg-white p-1">
