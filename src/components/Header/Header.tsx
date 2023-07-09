@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import { useMutation } from "react-query"
 import { GlobeAltIcon, ChevronDownIcon, MagnifyingGlassIcon, ShoppingCartIcon } from "@heroicons/react/24/outline"
 
-import { logout } from "src/apis/auth.api"
+import authApi from "src/apis/auth.api"
 import { AppContext } from "src/contexts/app.context"
 import path from "src/constants/path"
 
@@ -13,7 +13,7 @@ import Popover from "../Popover"
 export default function Header() {
   const { isAuthenticated, setIsAuthenticated, profile, setProfile } = useContext(AppContext)
   const logoutMutation = useMutation({
-    mutationFn: () => logout(),
+    mutationFn: () => authApi.logout(),
     onSuccess: () => {
       setIsAuthenticated(false)
       setProfile(null)
