@@ -1,6 +1,6 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline"
 import classNames from "classnames"
-import { createSearchParams, useNavigate } from "react-router-dom"
+import { Link, createSearchParams, useNavigate } from "react-router-dom"
 import { omit } from "lodash"
 
 import { QueryConfig } from "../ProductList"
@@ -104,13 +104,43 @@ export default function SortProductList({ queryConfig, pageSize }: Props) {
             <span className="text-orange">{currentPage}</span>
             <span>/{pageSize}</span>
           </div>
-          <div className="ml-2">
-            <button className="h-8 cursor-not-allowed rounded-bl-sm rounded-tl-sm bg-white/60 px-3 shadow hover:bg-slate-300">
-              <ChevronLeftIcon className="h-3 w-3" />
-            </button>
-            <button className="h-8 rounded-br-sm rounded-tr-sm bg-white px-3 shadow hover:bg-slate-300">
-              <ChevronRightIcon className="h-3 w-3" />
-            </button>
+          <div className="ml-2 flex">
+            {currentPage === 1 ? (
+              <span className="flex h-8 cursor-not-allowed items-center rounded-bl-sm rounded-tl-sm bg-white/60 px-3 shadow">
+                <ChevronLeftIcon className="h-3 w-3" />
+              </span>
+            ) : (
+              <Link
+                to={{
+                  pathname: path.home,
+                  search: createSearchParams({
+                    ...queryConfig,
+                    page: (currentPage - 1).toString()
+                  }).toString()
+                }}
+                className="flex h-8 items-center rounded-bl-sm rounded-tl-sm bg-white px-3 shadow hover:bg-slate-300"
+              >
+                <ChevronLeftIcon className="h-3 w-3" />
+              </Link>
+            )}
+            {currentPage === pageSize ? (
+              <span className="flex h-8 cursor-not-allowed items-center rounded-bl-sm rounded-tl-sm bg-white/60 px-3 shadow">
+                <ChevronRightIcon className="h-3 w-3" />
+              </span>
+            ) : (
+              <Link
+                to={{
+                  pathname: path.home,
+                  search: createSearchParams({
+                    ...queryConfig,
+                    page: (currentPage + 1).toString()
+                  }).toString()
+                }}
+                className="flex h-8 items-center rounded-bl-sm rounded-tl-sm bg-white px-3 shadow hover:bg-slate-300"
+              >
+                <ChevronRightIcon className="h-3 w-3" />
+              </Link>
+            )}
           </div>
         </div>
       </div>
