@@ -56,6 +56,16 @@ export const getRules = (getValues?: UseFormGetValues<any>): Rules => ({
   }
 })
 
+function testPriceMinMax(this: yup.TestContext<yup.AnyObject>) {
+  const { price_min, price_max } = this.parent as { price_min: string; price_max: string }
+
+  if (price_min !== "" && price_max !== "") {
+    return Number(price_max) >= Number(price_min)
+  }
+
+  return price_min !== "" || price_max !== ""
+}
+
 const generalSchema = yup.object({
   email: yup
     .string()
@@ -73,13 +83,25 @@ const generalSchema = yup.object({
     .required("Nhập lại password là bắt buộc")
     .min(6, "Độ dài từ 6 - 160 ký tự")
     .max(160, "Độ dài từ 6 - 160 ký tự")
-    .oneOf([yup.ref("password")], "Nhập lại password không khớp")
+    .oneOf([yup.ref("password")], "Nhập lại password không khớp"),
+  price_min: yup.string().test({
+    name: "price-not-allowed",
+    message: "Giá không phù hợp",
+    test: testPriceMinMax
+  }),
+  price_max: yup.string().test({
+    name: "price-not-allowed",
+    message: "Giá không phù hợp",
+    test: testPriceMinMax
+  })
 })
 
 // Form Validation
-export const registerSchema = generalSchema
-export const loginSchema = generalSchema.omit(["confirm_password"])
+export const registerSchema = generalSchema.pick(["email", "password", "confirm_password"])
+export const loginSchema = generalSchema.pick(["email", "password"])
+export const priceSchema = generalSchema.pick(["price_min", "price_max"])
 
 // Form Data Type
 export type RegisterSchema = yup.InferType<typeof registerSchema>
 export type LoginSchema = yup.InferType<typeof loginSchema>
+export type PriceSchema = yup.InferType<typeof priceSchema>
