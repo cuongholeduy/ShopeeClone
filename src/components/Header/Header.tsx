@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import { useMutation } from "react-query"
 import { GlobeAltIcon, ChevronDownIcon, MagnifyingGlassIcon, ShoppingCartIcon } from "@heroicons/react/24/outline"
 
-import { logout } from "src/apis/auth.api"
+import authApi from "src/apis/auth.api"
 import { AppContext } from "src/contexts/app.context"
 import path from "src/constants/path"
 
@@ -13,7 +13,7 @@ import Popover from "../Popover"
 export default function Header() {
   const { isAuthenticated, setIsAuthenticated, profile, setProfile } = useContext(AppContext)
   const logoutMutation = useMutation({
-    mutationFn: () => logout(),
+    mutationFn: () => authApi.logout(),
     onSuccess: () => {
       setIsAuthenticated(false)
       setProfile(null)
@@ -93,7 +93,7 @@ export default function Header() {
         </div>
         <div className="mt-4 grid grid-cols-12 items-center justify-items-center gap-4">
           <Link to={path.home} className="col-span-2">
-            <LogoIcon className="h-11 fill-white" />
+            <LogoIcon className="h-11 w-full fill-white" />
           </Link>
           <form className="col-span-9 w-full">
             <div className="flex rounded-sm bg-white p-1">
