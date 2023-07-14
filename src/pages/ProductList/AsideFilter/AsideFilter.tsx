@@ -4,6 +4,7 @@ import { ListBulletIcon, FunnelIcon } from "@heroicons/react/24/outline"
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { omit } from "lodash"
+import { ObjectSchema } from "yup"
 
 import path from "src/constants/path"
 import { QueryConfig } from "../ProductList"
@@ -35,7 +36,7 @@ export default function AsideFilter({ queryConfig, categories }: Props) {
       price_min: "",
       price_max: ""
     },
-    resolver: yupResolver(priceSchema),
+    resolver: yupResolver<FormData>(priceSchema as ObjectSchema<FormData>),
     shouldFocusError: false
   })
 
