@@ -6,9 +6,9 @@ import productApi from "src/apis/product.api"
 import { ProductListConfig } from "src/types/product.type"
 import categoryApi from "src/apis/category.api"
 
-import AsideFilter from "./AsideFilter"
-import Product from "./Product"
-import SortProductList from "./SortProductList"
+import AsideFilter from "./components/AsideFilter"
+import Product from "./components/Product"
+import SortProductList from "./components/SortProductList"
 import Pagination from "src/components/Pagination"
 
 export type QueryConfig = {

@@ -7,7 +7,7 @@ import { omit } from "lodash"
 import { ObjectSchema } from "yup"
 
 import path from "src/constants/path"
-import { QueryConfig } from "../ProductList"
+import { QueryConfig } from "../../ProductList"
 import { Category } from "src/types/category.type"
 import { PriceSchema, priceSchema } from "src/utils/rules"
 import { NoUndefinedField } from "src/types/utils.type"

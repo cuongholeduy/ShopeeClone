@@ -3,7 +3,7 @@ import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid"
 import { createSearchParams, useNavigate } from "react-router-dom"
 
 import path from "src/constants/path"
-import { QueryConfig } from "../ProductList"
+import { QueryConfig } from "../../ProductList"
 
 interface Props {
   queryConfig: QueryConfig
