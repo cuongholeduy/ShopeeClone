@@ -33,7 +33,7 @@ export default function ProductList() {
     isUndefined
   )
   const { data: productsData } = useQuery({
-    queryKey: ["/products", queryConfig],
+    queryKey: ["products", queryConfig],
     queryFn: () => {
       return productApi.getProducts(queryConfig as ProductListConfig)
     },
@@ -41,7 +41,7 @@ export default function ProductList() {
   })
 
   const { data: categoriesData } = useQuery({
-    queryKey: ["/categories"],
+    queryKey: ["categories"],
     queryFn: () => {
       return categoryApi.getCategories()
     }
