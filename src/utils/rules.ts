@@ -93,15 +93,18 @@ const generalSchema = yup.object({
     name: "price-not-allowed",
     message: "Giá không phù hợp",
     test: testPriceMinMax
-  })
+  }),
+  product_search: yup.string().trim().required()
 })
 
 // Form Validation
 export const registerSchema = generalSchema.pick(["email", "password", "confirm_password"])
 export const loginSchema = generalSchema.pick(["email", "password"])
 export const priceSchema = generalSchema.pick(["price_min", "price_max"])
+export const searchSchema = generalSchema.pick(["product_search"])
 
 // Form Data Type
 export type RegisterSchema = yup.InferType<typeof registerSchema>
 export type LoginSchema = yup.InferType<typeof loginSchema>
 export type PriceSchema = yup.InferType<typeof priceSchema>
+export type SearchSchema = yup.InferType<typeof searchSchema>

@@ -1,6 +1,16 @@
 import { StarIcon } from "@heroicons/react/24/solid"
 
-export default function ProductRating({ rating }: { rating: number }) {
+interface Props {
+  rating: number
+  activeClassname?: string
+  noneActiveClassname?: string
+}
+
+export default function ProductRating({
+  rating,
+  activeClassname = "h-3 w-3 text-yellow-400",
+  noneActiveClassname = "h-3 w-3 text-gray-400"
+}: Props) {
   const handleWidth = (order: number) => {
     if (order < rating) {
       return "100%"
@@ -21,9 +31,9 @@ export default function ProductRating({ rating }: { rating: number }) {
           return (
             <div className="relative" key={index}>
               <div className="absolute left-0 top-0 h-full overflow-hidden" style={{ width: handleWidth(index + 1) }}>
-                <StarIcon className="h-3 w-3 text-yellow-400" />
+                <StarIcon className={activeClassname} />
               </div>
-              <StarIcon className="h-3 w-3 text-gray-400" />
+              <StarIcon className={noneActiveClassname} />
             </div>
           )
         })}
