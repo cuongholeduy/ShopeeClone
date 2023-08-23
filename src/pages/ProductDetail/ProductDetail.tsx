@@ -1,28 +1,46 @@
-import { useEffect, useMemo, useState } from "react"
-import { useQuery } from "react-query"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "react-query"
 import { useParams } from "react-router-dom"
-import { ChevronLeftIcon, ChevronRightIcon, MinusIcon, PlusIcon, ShoppingCartIcon } from "@heroicons/react/24/outline"
+import { ChevronLeftIcon, ChevronRightIcon, ShoppingCartIcon } from "@heroicons/react/24/outline"
 import DOMPurify from "dompurify"
 
 import productApi from "src/apis/product.api"
-import { formatCurrency, formatNumberToSocialStyle, rateSale } from "src/utils/utils"
-import { Product } from "src/types/product.type"
+import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, rateSale } from "src/utils/utils"
+import { Product as ProductType, ProductListConfig } from "src/types/product.type"
+import purchaseApi from "src/apis/purchase.api"
+import { purchasesStatus } from "src/constants/purchase"
 
 import ProductRating from "src/components/ProductRating"
-import NumberInput from "src/components/NumberInput"
+import Product from "../ProductList/components/Product"
+import QuantityController from "src/components/QuantityController"
+import { toast } from "react-toastify"
 
 export default function ProductDetail() {
-  const { id } = useParams()
+  const [buyCount, setBuyCount] = useState(1)
+  const queryClient = useQueryClient()
+  const { nameId } = useParams()
+  const id = getIdFromNameId(nameId as string)
   const { data: productDetailData } = useQuery({
     queryKey: ["product", id],
-    queryFn: () => productApi.getProductDetail(id as string)
+    queryFn: () => productApi.getProductDetail(id)
   })
   const [currentIndexImages, setCurrentIndexImages] = useState([0, 5])
   const [activeImage, setActiveImage] = useState("")
   const product = productDetailData?.data.data
+  const imageRef = useRef<HTMLImageElement>(null)
   const currentImages = useMemo(() => {
     return product ? product.images.slice(...currentIndexImages) : []
   }, [product, currentIndexImages])
+  const queryConfig = { limit: "20", page: "1", category: product?.category._id }
+  const { data: productsData } = useQuery({
+    queryKey: ["products", queryConfig],
+    queryFn: () => {
+      return productApi.getProducts(queryConfig as ProductListConfig)
+    },
+    enabled: Boolean(product),
+    staleTime: 3 * 60 * 1000
+  })
+  const addToCartMutation = useMutation(purchaseApi.addToCart)
 
   useEffect(() => {
     if (product && product.images.length > 0) {
@@ -35,7 +53,7 @@ export default function ProductDetail() {
   }
 
   const next = () => {
-    if (currentIndexImages[1] < (product as Product).images.length) {
+    if (currentIndexImages[1] < (product as ProductType).images.length) {
       setCurrentIndexImages((prev) => [prev[0] + 1, prev[1] + 1])
     }
   }
@@ -46,6 +64,48 @@ export default function ProductDetail() {
     }
   }
 
+  const handleZoom = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const image = imageRef.current as HTMLImageElement
+    const { naturalHeight, naturalWidth } = image
+
+    // Bubble event
+    //const { offsetX, offsetY } = event.nativeEvent
+
+    // No bubble event
+    const offsetX = event.pageX - (rect.x + window.scrollX)
+    const offsetY = event.pageY - (rect.y + window.scrollY)
+
+    const top = offsetY * (1 - naturalHeight / rect.height)
+    const left = offsetX * (1 - naturalWidth / rect.width)
+
+    image.style.width = naturalWidth + "px"
+    image.style.height = naturalHeight + "px"
+    image.style.maxWidth = "unset"
+    image.style.top = top + "px"
+    image.style.left = left + "px"
+  }
+
+  const handleRemoveZoom = () => {
+    imageRef.current?.removeAttribute("style")
+  }
+
+  const handleBuyCount = (value: number) => {
+    setBuyCount(value)
+  }
+
+  const addToCart = () => {
+    addToCartMutation.mutate(
+      { buy_count: buyCount, product_id: product?._id as string },
+      {
+        onSuccess: (data) => {
+          toast.success(data.data.message, { autoClose: 1000 })
+          queryClient.invalidateQueries({ queryKey: ["purchases", { status: purchasesStatus.inCart }] })
+        }
+      }
+    )
+  }
+
   if (!product) return null
 
   return (
@@ -54,7 +114,12 @@ export default function ProductDetail() {
         <div className="p4 bg-white shadow">
           <div className="grid grid-cols-12 gap-9">
             <div className="col-span-5">
-              <div className="relative w-full pt-[100%] shadow">
+              <div
+                className="relative w-full cursor-zoom-in overflow-hidden pt-[100%] shadow"
+                onMouseMove={handleZoom}
+                onMouseLeave={handleRemoveZoom}
+                ref={imageRef}
+              >
                 <img
                   src={activeImage}
                   alt={product.name}
@@ -116,25 +181,19 @@ export default function ProductDetail() {
               </div>
               <div className="mt-8 flex items-center">
                 <div className="capitalize text-gray-500">Số lượng</div>
-                <div className="ml-10 flex items-center">
-                  <button className="flex h-8 w-8 items-center justify-center rounded-l-sm border border-gray-300 text-gray-600">
-                    <MinusIcon className="h-4 w-4" />
-                  </button>
-                  <NumberInput
-                    value={1}
-                    classNameError="hidden"
-                    classNameInput="h-8 w-14 border-t border-b border-gray-300 p-1 text-center outline-none"
-                  />
-                  <button className="flex h-8 w-8 items-center justify-center rounded-r-sm border border-gray-300 text-gray-600">
-                    <PlusIcon className="h-4 w-4" />
-                  </button>
-                </div>
+                <QuantityController
+                  onDecrease={handleBuyCount}
+                  onIncrease={handleBuyCount}
+                  onType={handleBuyCount}
+                  value={buyCount}
+                  max={product.quantity}
+                />
                 <div className="ml-6 text-sm text-gray-500">{product.quantity} sản phẩm có sẵn</div>
               </div>
               <div className="mt-8 flex items-center">
                 <button
                   className="flex h-12 items-center justify-center rounded-sm border border-orange bg-orange/10 px-5 capitalize shadow-sm hover:bg-orange/5"
-                  onClick={() => console.log("aaaaa")}
+                  onClick={addToCart}
                 >
                   <ShoppingCartIcon className="mr-[10px] h-5 w-5 fill-current stroke-orange text-orange" />
                   Thêm vào giỏ hàng
@@ -150,12 +209,30 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
-      <div className="container">
-        <div className="mt-8 bg-white p-4 shadow">
-          <div className="rounded bg-gray-50 p-4 text-lg capitalize text-slate-700">Mô tả sản phẩm</div>
-          <div className="mx-4 mb-4 mt-12 text-sm leading-loose">
-            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }} />
+      <div className="mt-8">
+        <div className="container">
+          <div className="mt-8 bg-white p-4 shadow">
+            <div className="rounded bg-gray-50 p-4 text-lg capitalize text-slate-700">Mô tả sản phẩm</div>
+            <div className="mx-4 mb-4 mt-12 text-sm leading-loose">
+              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }} />
+            </div>
           </div>
+        </div>
+      </div>
+      <div className="mt-8">
+        <div className="container">
+          <div className="uppercase text-gray-400">Có thể bạn sẽ thích</div>
+          {productsData && (
+            <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+              {productsData.data.data.products.map((product) => {
+                return (
+                  <div className="col-span-1" key={product._id}>
+                    <Product product={product} />
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
